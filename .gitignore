@@ -27,3 +27,6 @@ node_modules/
 .env
 dist/
 build/
+# backend directories
+backend/.env
+backend/node_modules/
