@@ -5,27 +5,46 @@ import PreferenceChips from "./PreferenceChips";
 import CookingAnimation from "./CookingAnimation";
 import RecipeList from "./RecipeList";
 import RecipeDetailModal from "./RecipeDetailModal";
-import { fetchRecipesByIngredients } from "@/services/spoonacular";
+
+const BACKEND_URL = "http://localhost:5000/api/recipe/generate";
 
 const Home = () => {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [selectedRecipe, setSelectedRecipe] = useState<any | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState("");
 
   const handleGenerate = async () => {
     setLoading(true);
-    const data = await fetchRecipesByIngredients(ingredients, preferences);
-    setRecipes(data);
-    setLoading(false);
-  };
+    setError("");
 
-  const handleRecipeSelect = (recipe: any) => {
-    setSelectedRecipe(recipe);
-    setIsModalOpen(true);
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ingredients,
+          preferences,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      // Backend returns ONE recipe → convert to array for UI
+      setRecipes([data]);
+    } catch (err: any) {
+      setError("Failed to generate recipe. Backend not responding.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,28 +69,31 @@ const Home = () => {
 
           <button
             onClick={handleGenerate}
-            className="mt-6 px-8 py-4 rounded-xl gradient-accent text-white"
+            disabled={ingredients.length < 2}
+            className="mt-6 px-8 py-4 rounded-xl gradient-accent text-white disabled:opacity-50"
           >
-            🍳 Generate Recipes
+            🍳 Generate Recipe
           </button>
         </section>
 
         {loading && <CookingAnimation />}
 
+        {error && (
+          <p className="text-center text-red-400 mt-4">{error}</p>
+        )}
+
         {!loading && recipes.length > 0 && (
           <RecipeList
             recipes={recipes}
-            onRecipeSelect={handleRecipeSelect}
-            showBachelorBadges={preferences.includes("bachelor")}
+            onRecipeSelect={(r) => setSelectedRecipe(r)}
           />
         )}
       </main>
 
-      {/* ✅ RECIPE DETAIL MODAL */}
       <RecipeDetailModal
         recipe={selectedRecipe}
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        open={!!selectedRecipe}
+        onClose={() => setSelectedRecipe(null)}
       />
     </div>
   );
