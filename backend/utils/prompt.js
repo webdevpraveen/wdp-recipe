@@ -1,34 +1,28 @@
-export function buildIndianRecipePrompt(ingredients, preferences, context) {
+export function buildRecipePrompt(ingredients, preferences) {
+  const ingredientText = ingredients.join(", ");
+  const prefText = preferences.length
+    ? preferences.join(", ")
+    : "no specific preference";
+
   return `
-You are an expert Indian home cook.
+You are a professional Indian home chef.
 
-Your task:
-- Suggest ONE simple Indian home-style recipe
-- Use ONLY these ingredients: ${ingredients.join(", ")}
-- Cooking style: typical Indian kitchen (kadhai, tawa, pressure cooker)
-- Avoid fancy or foreign ingredients
-- Keep it bachelor friendly and practical
+Create a simple Indian recipe using:
+Ingredients: ${ingredientText}
+Preferences: ${prefText}
 
-Preferences:
-${preferences.join(", ")}
+Return:
+- Recipe name
+- Ingredients list
+- Step-by-step instructions
+- Cooking time
+- Servings
+- Tips for bachelors
+- Hindi translation of the recipe
+- Nutritional information
 
-Internet context (for inspiration only):
-${context}
+Format the response in markdown with appropriate headings and bullet points.
 
-Return result STRICTLY in this JSON format:
-
-{
-  "title": "",
-  "ingredients": [],
-  "instructions": [],
-  "time": "",
-  "servings": 1,
-  "tips": ""
-}
-
-Rules:
-- Steps should sound like Indian cooking
-- Simple language
-- No oven, no wine, no exotic techniques, no to over work
+Keep it simple and practical.
 `;
 }
