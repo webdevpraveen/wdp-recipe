@@ -10,6 +10,7 @@ const PREFERENCES = [
   { id: "quick", label: "⏱ Under 20 Minutes" },
   { id: "few", label: "🧺 Few Ingredients" },
   { id: "budget", label: "💸 Budget Friendly" },
+  { id: "hindi", label: "👌Hinglish" },
 ];
 
 const PreferenceChips = ({
