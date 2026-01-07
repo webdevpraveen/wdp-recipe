@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 # Dependency directories
 node_modules/
-.env
 dist/
 build/
 # backend directories

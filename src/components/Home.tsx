@@ -5,8 +5,9 @@ import PreferenceChips from "./PreferenceChips";
 import CookingAnimation from "./CookingAnimation";
 import RecipeList from "./RecipeList";
 import RecipeDetailModal from "./RecipeDetailModal";
-
-const BACKEND_URL = "http://localhost:5000/api/recipe/generate";
+const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL ||
+  "http://localhost:5000/api/recipe/generate";
 
 export interface Recipe {
   title: string;
