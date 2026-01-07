@@ -8,40 +8,52 @@ import RecipeDetailModal from "./RecipeDetailModal";
 
 const BACKEND_URL = "http://localhost:5000/api/recipe/generate";
 
+export interface Recipe {
+  title: string;
+  ingredients: string[];
+  steps: string[];
+  cookTime: string;
+  tips: string;
+}
+
 const Home = () => {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<string[]>([]);
-  const [recipes, setRecipes] = useState<any[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState<any | null>(null);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [error, setError] = useState("");
 
   const handleGenerate = async () => {
+    if (ingredients.length < 2) return;
+
     setLoading(true);
     setError("");
+    setRecipes([]);
 
     try {
       const res = await fetch(BACKEND_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           ingredients,
-          preferences,
-        }),
+          preferences
+        })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
+        throw new Error(data?.error || "Failed to generate recipe");
       }
 
-      // Backend returns ONE recipe → convert to array for UI
+      // backend returns ONE recipe → UI expects list
       setRecipes([data]);
-    } catch (err: any) {
-      setError("Failed to generate recipe. Backend not responding.");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to generate recipe. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -52,44 +64,63 @@ const Home = () => {
       <Header />
 
       <main className="container mx-auto px-4 pb-16">
+        {/* HERO / INPUT SECTION */}
         <section className="py-12 text-center">
-          <h2 className="text-4xl font-bold mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-bold mb-4">
             What's in Your <span className="text-gradient">Kitchen?</span>
           </h2>
 
-          <IngredientInput
-            ingredients={ingredients}
-            onIngredientsChange={setIngredients}
-          />
+          <p className="text-muted-foreground mb-8">
+            Add ingredients you have and get a simple Indian recipe ✨
+          </p>
 
-          <PreferenceChips
-            selectedPreferences={preferences}
-            onPreferencesChange={setPreferences}
-          />
+          <div className="space-y-6">
+            <IngredientInput
+              ingredients={ingredients}
+              onIngredientsChange={setIngredients}
+            />
 
-          <button
-            onClick={handleGenerate}
-            disabled={ingredients.length < 2}
-            className="mt-6 px-8 py-4 rounded-xl gradient-accent text-white disabled:opacity-50"
-          >
-            🍳 Generate Recipe
-          </button>
+            <PreferenceChips
+              selectedPreferences={preferences}
+              onPreferencesChange={setPreferences}
+            />
+
+            <button
+              onClick={handleGenerate}
+              disabled={ingredients.length < 2 || loading}
+              className="mt-6 px-8 py-4 rounded-xl gradient-accent text-primary-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              🍳 Generate Recipe
+            </button>
+          </div>
         </section>
 
-        {loading && <CookingAnimation />}
-
-        {error && (
-          <p className="text-center text-red-400 mt-4">{error}</p>
+        {/* LOADING */}
+        {loading && (
+          <section className="mt-8">
+            <CookingAnimation />
+          </section>
         )}
 
+        {/* ERROR */}
+        {!loading && error && (
+          <p className="text-center text-red-500 mt-6">
+            {error}
+          </p>
+        )}
+
+        {/* RESULTS */}
         {!loading && recipes.length > 0 && (
-          <RecipeList
-            recipes={recipes}
-            onRecipeSelect={(r) => setSelectedRecipe(r)}
-          />
+          <section className="mt-10 animate-fade-up">
+            <RecipeList
+              recipes={recipes}
+              onRecipeSelect={(recipe) => setSelectedRecipe(recipe)}
+            />
+          </section>
         )}
       </main>
 
+      {/* RECIPE DETAIL MODAL */}
       <RecipeDetailModal
         recipe={selectedRecipe}
         open={!!selectedRecipe}
