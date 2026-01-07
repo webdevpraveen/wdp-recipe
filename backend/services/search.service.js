@@ -1,3 +1,12 @@
+/**
+ * NOTE:
+ * This service is currently NOT used in the active flow.
+ * It is reserved for future enhancements like:
+ * - Web-based recipe search
+ * - AI fallback enrichment
+ * - YouTube / blog recipe extraction
+ */
+
 import fetch from "node-fetch";
 
 export async function searchIndianRecipes(ingredients) {

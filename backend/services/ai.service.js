@@ -1,62 +1,57 @@
 import fetch from "node-fetch";
-import { buildIndianRecipePrompt } from "../utils/prompt.js";
 
-export async function generateIndianRecipe(
-  ingredients,
-  preferences,
-  context
-) {
-  const prompt = buildIndianRecipePrompt(
-    ingredients,
-    preferences,
-    context
-  );
+export async function generateRecipe(ingredients, preferences) {
+  const API_KEY = process.env.GROQ_API_KEY;
+
+  if (!API_KEY) {
+    throw new Error("GROQ_API_KEY missing");
+  }
+
+  console.log("🔑 GROQ KEY PREFIX:", API_KEY.slice(0, 6));
+
+  const prompt = `
+You are an Indian home cooking assistant.
+
+Create a SIMPLE Indian recipe (ghar jaisa khana).
+
+Ingredients: ${ingredients.join(", ")}
+Preferences: ${preferences.join(", ")}
+
+Return STRICT JSON only in this format:
+{
+  "title": "",
+  "ingredients": [],
+  "steps": [],
+  "cookTime": "",
+  "tips": ""
+}
+`;
 
   const response = await fetch(
-    "https://api.openai.com/v1/chat/completions",
+    "https://api.groq.com/openai/v1/chat/completions",
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        // 🔥 SAFE + AVAILABLE MODEL
-        model: "gpt-3.5-turbo",
+        model: "llama-3.1-8b-instant", // ✅ UPDATED MODEL
         messages: [
-          {
-            role: "system",
-            content:
-              "You are a strict JSON API. Respond ONLY with valid JSON.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
+          { role: "system", content: "You are a helpful Indian cooking assistant." },
+          { role: "user", content: prompt }
         ],
-        temperature: 0.4,
-      }),
+        temperature: 0.6
+      })
     }
   );
 
   const data = await response.json();
 
-  console.log("🧠 AI RAW RESPONSE:", data);
-
-  if (!data.choices || !data.choices[0]) {
-    throw new Error("No AI response");
+  if (!data.choices) {
+    console.error("❌ GROQ RAW ERROR:", data);
+    throw new Error("Groq failed");
   }
 
-  const rawText = data.choices[0].message.content;
-
-  const jsonStart = rawText.indexOf("{");
-  const jsonEnd = rawText.lastIndexOf("}");
-
-  if (jsonStart === -1 || jsonEnd === -1) {
-    throw new Error("Invalid JSON from AI");
-  }
-
-  const cleanJson = rawText.slice(jsonStart, jsonEnd + 1);
-
-  return JSON.parse(cleanJson);
+  return data.choices[0].message.content;
 }
