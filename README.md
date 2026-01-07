@@ -77,11 +77,26 @@ The backend is intentionally designed so that **AI providers can be switched to 
 > Now it work with Gemini API
 
 The backend is now structured to support:
-- OpenAI (previous)
-- Gemini (current )
-- Any future AI provider 
+- OpenAI (initial implementation)
+- Gemini (API & billing limitations during development)
+- Groq (current production provider)
 
-No frontend changes are required when switching providers.
+> This project went through multiple AI provider iterations, reflecting real-world constraints:
+
+---
+## 🚀 Deployment
+
+### Frontend
+
+- Deployed on Vercel
+- Environment-based API configuration
+- Optimized production build with Vite
+
+### Backend
+
+- Deployed on Render
+- Proper CORS handling for production domains
+- Secure environment variable setup
 
 ---
 
@@ -91,8 +106,17 @@ No frontend changes are required when switching providers.
 * Frontend complete
 * Backend connected
 * AI abstraction ready
-* Gemini integration in progress...
-* Deployment planned...
+* Production deployment live
+* End-to-end flow working
+
 ---
 
-> This project reflects real-world problem solving, iteration, and engineering decisions — not just a demo app.
+## 🧑‍💻 Contributing
+Contributions are welcome.  
+Create an issue or submit a pull request to improve the project.
+
+---
+
+## ⭐ Support
+If you find this helpful, consider giving the repo a ⭐.
+
