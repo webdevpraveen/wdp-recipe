@@ -8,8 +8,12 @@ import recipeRoutes from "./routes/recipe.js";
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:8080", // frontend URL
-    methods: ["POST"],
+    origin: [
+      "http://localhost:8080",
+      "http://localhost:5173",
+      "https://wdprecipe.vercel.app"
+    ],
+    methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
   })
 );
